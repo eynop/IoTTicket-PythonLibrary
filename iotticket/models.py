@@ -64,8 +64,9 @@ class device(object):
 	createdAt = ""
 	deviceId = ""
 	href = ""
+	enterpriseId=""
 	attributes = None
-	def __init__(self, name = "", manufacturer = "", type = "", description = "", createdAt = "", deviceId = "", href = "", attributes = None):
+	def __init__(self, name = "", manufacturer = "", type = "", description = "", createdAt = "", deviceId = "", href = "", attributes = None,enterpriseId=""):
 		self.name = name
 		self.manufacturer = manufacturer
 		self.type = type
@@ -73,7 +74,8 @@ class device(object):
 		self.createdAt = createdAt
 		self.deviceId = deviceId
 		self.href = href
-		self.attributes = attributes	
+		self.attributes = attributes
+		self.enterpriseId=enterpriseId
 	def parsedata(self, data):
 		self.__dict__ = data	
 		#check if device has attribute			
@@ -112,7 +114,11 @@ class device(object):
 		if(self.deviceId != None and self.deviceId != ""):
 			sb.Append("deviceId: ")
 			sb.Append(self.deviceId)
-			sb.Append("\n")		
+			sb.Append("\n")
+		if (self.enterpriseId != None and self.enterpriseId != ""):
+			sb.Append("EnterpriseId: ")
+			sb.Append(self.enterpriseId)
+			sb.Append("\n")
 		if(self.href != None and self.href != ""):
 			sb.Append("href: ")
 			sb.Append(self.href)
@@ -121,7 +127,8 @@ class device(object):
 			sb.Append("attributes: \n")
 			for da in self.attributeslist:
 				sb.Append(str(da))
-			sb.Append("\n")	
+			sb.Append("\n")
+
 		return str(sb)
 	def set_name(self, new_name):
 		self.name = new_name
@@ -154,7 +161,11 @@ class device(object):
 			else:
 				print("Attribute : ", a , " is not valid.")
 	def get_attributes(self):
-		return self.attributeslist	
+		return self.attributeslist
+	def set_enterpriseId(self, new_enterpriseId):
+		self.enterpriseId = new_enterpriseId
+	def get_enterpriseId(self):
+		return self.enterpriseId
 #devices class
 class devices(object):	
 	""" Devices class content list of device. It will return list of device object."""
@@ -302,7 +313,7 @@ class vts(object):
 #datanodes value class
 class datanodesvalue(object):
 	""" Contain datanode infomation and list of datanode value depends on how the url is passed."""
-	crit = [{"name": {"max_length":100, "nullable" : False, "dataType" : str}}, {"unit": {"max_length": 10, "dataType" : str}}, {"path": {"max_length": 1000, "regex" : "(\\/[a-zA-Z0-9]+){1,10}$", "dataType" : str}},{"v": {"nullable" : False, "dataType" : "multi"}}]
+	crit = [{"name": {"max_length":100, "nullable" : False, "dataType" : str}}, {"unit": {"max_length": 10, "dataType" : str}}, {"path": {"max_length": 1000, "regex" : "(\\/[a-zA-Z0-9_]+){1,10}$", "dataType" : str}},{"v": {"nullable" : False, "dataType" : "multi"}}]
 	unit = ""
 	dataType = ""
 	href = ""

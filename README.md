@@ -39,6 +39,7 @@ getdatanodeslist(self, deviceId, limit, offset)
 getallquota(self)
 getdevicequota(self, deviceId)
 registerdevice(self, deviceobj)
+movedevice(self, deviceId, enterpriseId)
 readdata(self, deviceId, criteriaobj, fromdate, todate, limit)
 writedata(self, deviceId, *datanodevalueobj)
 </code></pre>
@@ -55,7 +56,7 @@ NOTE: In order to run the demo application or unittest provided in our project, 
     "baseurl": "https://my.iot-ticket.com/api/v1/"
 }
 </code></pre>
-NOTE: The base URL if you are using our IoT server will be: "https://my.iot-ticket.com/api/v1/"
+NOTE: The base URL if you are using basic IoT-Ticket server will be: "https://my.iot-ticket.com/api/v1/"
 In demo application, config file is called:
 <pre><code>
 data = json.load(open(sys.argv[1]))
@@ -80,6 +81,7 @@ d.set_name("Johan")
 d.set_manufacturer("Wapice")
 d.set_type("employee")
 d.set_description("Im trainee")
+d.set_enterpriseId("E0000")
 d.set_attributes(deviceattribute("a","b"), deviceattribute("c","d"), deviceattribute("key","value")) [replace the arguments by list of deviceattribute object]	
 
 c = client(baseurl, username, password)
@@ -88,31 +90,41 @@ c.registerdevice(d)
 </code></pre>
 Register Device Function source code:
 <pre><code>
-def registerdevice(self, deviceobj):		
-		if(validate(deviceobj)):
-			try:
-				#parse to json and encode
-				j = json.dumps(deviceobj.__dict__, sort_keys = True, indent=4)
-				data = j.encode("utf8")			
-				auth = url.HTTPBasicAuthHandler()
-				pathUrl = self.baseUrl + self.deviceresource
-				auth.add_password(realm="Wapice IOT", uri = pathUrl, user = self.username, passwd = self.password)
-				opener = url.build_opener(auth)
-				url.install_opener(opener)
-				#create request with header
-				req = url.Request(pathUrl, data=data, headers={'content-type' : 'application/json'})			
-				response = url.urlopen(req)
-				response = response.read()
-			except err.HTTPError as e:
-				if(e.code!=404):
-					return self.get_errorinfo(e.code, e.read())		
-				else:
-					return "404 URL NOT FOUND!!!"		
-			else:
-				return self.get_response(response, "iotticketmodels.device")
-		else:
-			return "Device is not valid."
+    def registerdevice(self, deviceobj):
+        """Register new device."""
+        if (validate(deviceobj)):
+            try:
+                # parse to json and encode
+                device_dict = deviceobj.__dict__
+                enterprise = device_dict["enterpriseId"]
+                print(device_dict)
+                if enterprise == "":
+                    device_dict.pop("enterpriseId")
+                j = json.dumps(device_dict, sort_keys=True, indent=4)
+                data = j.encode("utf8")
+                pathUrl = self.baseUrl + self.deviceresource
+
+                req = urllib.request.Request(pathUrl,data=data, headers=self.headers)
+
+                with urllib.request.urlopen(req, context=self.context) as response:
+                    response = response.read()
+
+            except err.HTTPError as e:
+                raise self.get_errorinfo(e.code, e.read()) from None
+            else:
+                return self.get_response(response, "iotticket.models.device")
+        else:
+            return "Device is not valid."
 </code></pre>
+
+### Move a device
+<pre><code>
+c = client(baseurl, username, password)
+
+c.movedevice(deviceId,"E0001")
+
+parameters of movedevice are device id of device that is moved and enterprise id of destination enterprise.
+</pre></code>
 ### Validate function
 Validate function using declared criteria in class
 <pre><code>
@@ -176,5 +188,5 @@ If limit is provided but not fromdate and todate, then the function can be calle
 If no extra argument is provided, simply call c.readdata(deviceId, cr)
 </code></pre>
 ## API documentation
-This C++ client library uses the IoT-Ticket REST API. The documentation for the underlying REST service can be found from
+This Python client library uses the IoT-Ticket REST API. The documentation for the underlying REST service can be found from
 https://www.iot-ticket.com/images/Files/IoT-Ticket.com_IoT_API.pdf
