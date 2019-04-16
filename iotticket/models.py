@@ -313,7 +313,7 @@ class vts(object):
 #datanodes value class
 class datanodesvalue(object):
 	""" Contain datanode infomation and list of datanode value depends on how the url is passed."""
-	crit = [{"name": {"max_length":100, "nullable" : False, "dataType" : str}}, {"unit": {"max_length": 10, "dataType" : str}}, {"path": {"max_length": 1000, "regex" : "(\\/[a-zA-Z0-9_]+){1,10}$", "dataType" : str}},{"v": {"nullable" : False, "dataType" : "multi"}}]
+	crit = [{"name": {"max_length":100, "nullable" : False, "dataType" : str}}, {"unit": {"max_length": 10, "dataType" : str}}, {"path": {"max_length": 1000, "regex" : "(\\/[a-zA-Z0-9_]+){0,10}$", "dataType" : str}},{"v": {"nullable" : False, "dataType" : "multi"}}]
 	unit = ""
 	dataType = ""
 	href = ""
@@ -359,6 +359,8 @@ class datanodesvalue(object):
 	def set_path(self, new_path):
 		if( new_path.startswith("/")):
 			self.path = new_path
+		elif new_path == "": 
+			self.path = ""
 		else:
 			self.path = "/" + new_path
 	def get_path(self):
